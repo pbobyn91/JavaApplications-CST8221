@@ -1,3 +1,14 @@
+/*
+ * File Name: ServerChatUI.java
+ * Author: Patrick Bobyn, 040889706 
+ * Course: CST8221 - JAP, Lab Section: 302
+ * Assignment: 2 Part 2
+ * Date: Dec 6th, 2019
+ * Professor: Svillan Ranev
+ * Purpose: This creates the GUI for the Server chat side. It also accepts the connection and allows messages to be sent.
+ * Class List: ServerChatUI.java, WindowController.java, Controller.java
+ */
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -18,18 +29,63 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
+/**
+ * @author Pat
+ * @version 1.0
+ * @see WindowController, Controller
+ * @since 1.8.0_144
+ */
 public class ServerChatUI extends JFrame implements Accessible {
 
-	private JTextField message; // text for the message field 
-	private JButton sendButton;	// the button to send the message
-	private JTextArea display;	// the history of the whole conversation
-	private JScrollPane scroll;	// a scroll pane 
-	private ObjectOutputStream outputStream;	// the output stream
-	private Socket socket;				// the socket used
-	private ConnectionWrapper connection;	// the connection
+	/**
+	 * message The message to be sent back to the client
+	 */
+	private JTextField message;
+	
+	/**
+	 * sendButton The sendButton to send the message 
+	 */
+	private JButton sendButton;
+	
+	/**
+	 * display The display of the whole conversation
+	 */
+	private JTextArea display;
+	
+	/**
+	 * scroll the Scroll Pane used to scroll the display section
+	 */
+	private JScrollPane scroll;
+	
+	/**
+	 * outputStream The output from the message 
+	 */
+	private ObjectOutputStream outputStream;
+	
+	/**
+	 * socket The socket connection
+	 */
+	private Socket socket;
+	
+	/**
+	 * connection The instance of the ConnectionWrapper
+	 */
+	private ConnectionWrapper connection;
+	
+	/**
+	 * windowController An Instance of the Window Controller
+	 */
 	private WindowController windowController = new WindowController();
+	
+	/**
+	 * controller The controller that reads the input
+	 */
 	private Controller controller = new Controller();
 	
+	/**
+	 * The constructor
+	 * @param socket the socket used for the connection
+	 */
 	public ServerChatUI(Socket socket) {
 		// constructor for the server chat
 		this.socket = socket;
@@ -37,6 +93,10 @@ public class ServerChatUI extends JFrame implements Accessible {
 		runClient();
 	}
 	
+	/**
+	 * The method that creates the GUI
+	 * @return Returns a JPanel
+	 */
 	public JPanel createUI () {
 		
 		// local variables
@@ -87,6 +147,9 @@ public class ServerChatUI extends JFrame implements Accessible {
 		return panel;
 	}
 	
+	/** 
+	 * The overriden getDisplay method from the Accessible class
+	 */
 	@Override
 	public JTextArea getDisplay() {
 		
@@ -94,6 +157,9 @@ public class ServerChatUI extends JFrame implements Accessible {
 		return this.display;
 	}
 	
+	/**
+	 * the overriden clostChat method from the Accessible class
+	 */
 	@Override
 	public void closeChat() {
 		
@@ -107,6 +173,10 @@ public class ServerChatUI extends JFrame implements Accessible {
 		}
 	}
 	
+	/**
+	 * A method that sets the frame 
+	 * @param panel The panel that is used for the frame
+	 */
 	public final void setFrame(JPanel panel) {
 		
 		// adds the panel passed to it and creates the frame
@@ -116,6 +186,9 @@ public class ServerChatUI extends JFrame implements Accessible {
 		this.addWindowListener(windowController);
 	}
 	
+	/** 
+	 * the method that runs the client
+	 */
 	private void runClient() {
 		
 		// initialize the connection
@@ -137,8 +210,16 @@ public class ServerChatUI extends JFrame implements Accessible {
 		thread.start();
 	}
 	
+	/**
+	 * @author Pat
+	 * @version 1.0
+	 * @since 1.8.0_144
+	 */
 	private class WindowController extends WindowAdapter {
 		
+		/**
+		 * the method to close the window
+		 */
 		public void windowClosing() {
 			
 			Boolean writingError = false;
@@ -151,7 +232,6 @@ public class ServerChatUI extends JFrame implements Accessible {
 			try {
 				outputStream.writeObject(ChatProtocolConstants.DISPLACEMENT + ChatProtocolConstants.CHAT_TERMINATOR + ChatProtocolConstants.LINE_TERMINATOR);
 			} catch (IOException e) {
-				e.printStackTrace();
 				writingError = true;
 			} finally {	// if exception occurs dispose frame
 				if (writingError)
@@ -164,7 +244,6 @@ public class ServerChatUI extends JFrame implements Accessible {
 			try {
 				connection.closeConnection();
 			} catch (IOException ioe) {
-				ioe.printStackTrace();
 				closingError = true;
 			} finally {
 				if (closingError)
@@ -176,13 +255,24 @@ public class ServerChatUI extends JFrame implements Accessible {
 			System.out.println("Chat Closed!");
 		}
 		
+		/** 
+		 * the method that closes the server side chat
+		 */
 		public void windowClosed() {
 			System.out.println("Server UI Closed");
 		}
 	}
 	
+	/**
+	 * @author Pat
+	 * @version 1.0
+	 * @since 1.8.0_144
+	 */
 	private class Controller implements ActionListener {
 		
+		/** 
+		 * the overriden actionPerformed method
+		 */
 		@Override
 		public void actionPerformed(ActionEvent event) {
 			
@@ -191,6 +281,9 @@ public class ServerChatUI extends JFrame implements Accessible {
 			}
 		}
 		
+		/**
+		 * the method that sends the user written message
+		 */
 		private void send() {
 			
 			// local variable sendMessage gets text from message text field
@@ -206,8 +299,6 @@ public class ServerChatUI extends JFrame implements Accessible {
 			} catch (IOException ioe) {
 				display.append(ioe.getMessage() + ChatProtocolConstants.LINE_TERMINATOR);
 			}
-			
-			
 		}
 	}
 }

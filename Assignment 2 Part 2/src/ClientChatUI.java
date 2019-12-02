@@ -1,3 +1,14 @@
+/*
+ * File Name: ClientChatUI.java
+ * Author: Patrick Bobyn, 040889706 
+ * Course: CST8221 - JAP, Lab Section: 302
+ * Assignment: 2 Part 2
+ * Date: Dec 6th, 2019
+ * Professor: Svillan Ranev
+ * Purpose: This is the GUI for the Client Chat system. It also sets up the connection to the server and acts as a chat mmessage.
+ * Class List: ClientChatUI.java, WindowController.java, Controller.java
+ */
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -27,32 +38,92 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
+/**
+ * @author Pat
+ * @verion 1.0
+ * @see WindowController, Controller
+ * @since 1.8.0_144
+ */
+
 public class ClientChatUI extends JFrame implements Accessible {
 	
-	private JTextField hostText;	// text field for the hostname to connect to 
-	private JComboBox<String> combo;	// the combo box for the connection section, selects the port
-	private JButton connect;	// the connect button
-	private JTextField message;	// the text field for the message section
-	private JTextArea display;	// the history of the chat for the display section
-	private JButton sendButton;	// the send button for sending the message
-	private ObjectOutputStream outputStream;	// output stream
-	private Socket socket;		// socket
-	private ConnectionWrapper connection;	// connection wrapper object
+	/** 
+	 * hostText A JTextField that is used to get a location to connect to.
+	 */
+	private JTextField hostText;
+	
+	/**
+	 * combo The combo box option to hold the port values 
+	 */
+	private JComboBox<String> combo;
+	
+	/**
+	 * connect The button to allow the connection
+	 */
+	private JButton connect;
+	
+	/**
+	 * message The JTextField to allow the user to enter a message 
+	 */
+	private JTextField message;
+	
+	/** 
+	 * display The display for the whole chat
+	 */
+	private JTextArea display;
+	
+	/** 
+	 * sendButton The button that allows a message to be sent.
+	 */
+	private JButton sendButton;
+	
+	/**
+	 * outputStream The output.
+	 */
+	private ObjectOutputStream outputStream;
+	
+	/**
+	 * socket The socket to connect Client to server
+	 */
+	private Socket socket;
+	
+	/** 
+	 * connection The ConnectionWrapper 
+	 */
+	private ConnectionWrapper connection;
+	
+	/** 
+	 * controller An instance of the controller class
+	 */
 	private Controller controller = new Controller();
+	
+	/** 
+	 * ports The port options to be used 
+	 */
 	private String ports[] = {"", "8089", "65000", "65535"};
 	
 
+	/**
+	 * The Constructor for the ClienChatUI class.
+	 * @param title The title of the client side chat
+	 */
 	public ClientChatUI(String title) {
 		super.setTitle(title);
 		runClient();
 	}
 	
+	/**
+	 * the Overriden getDisplay method from the Accessible interface.
+	 */
 	@Override
 	public JTextArea getDisplay() {
 		// return the display
 		return this.display;
 	}
 	
+	/**
+	 * the Overriden closeChat method from the Accessible interface.
+	 */
 	@Override
 	public void closeChat() {
 		// if the socket is not closed, tries to close the connection
@@ -65,11 +136,18 @@ public class ClientChatUI extends JFrame implements Accessible {
 		}
 	}
 	
+	/**
+	 *  A method to run the client
+	 */
 	private void runClient() {
 		setContentPane(createClientUI());
 		addWindowListener(new WindowController());
 	}
 	
+	/**
+	 * The method creates the appearance of the GUI
+	 * @return Returns a JPanel to be inputted into the frame
+	 */
 	public JPanel createClientUI () {
 		
 		// Create Variables
@@ -175,6 +253,9 @@ public class ClientChatUI extends JFrame implements Accessible {
 		return panel;
 	}
 	
+	/**
+	 * A method to enable the connect button, for after a connection has been made
+	 */
 	private void enableConnectButton() {
 		// enables the connect button, sets background color to red
 		connect.setEnabled(true);
@@ -185,22 +266,37 @@ public class ClientChatUI extends JFrame implements Accessible {
 		hostText.setRequestFocusEnabled(true);
 	}
 	
+	/**
+	 * @author Pat
+	 * @version 1.0
+	 * @since 1.8.0_144
+	 */
 	private class WindowController extends WindowAdapter {
 		
+		/**
+		 * the option to close the window
+		 */
 		public void windowClosing() {
 			
 			// tries to output message, if it fails then exits
 			try {
 				outputStream.writeObject(ChatProtocolConstants.CHAT_TERMINATOR);
 			} catch (IOException ioe) {
-				ioe.printStackTrace();
 				System.exit(0);
 			}
 		}
 	}
 	
+	/**
+	 * @author Pat
+	 * @version 1.0
+	 * @since 1.8.0_144
+	 */
 	private class Controller implements ActionListener {
 		
+		/**
+		 * The overriden version of the actionPerformed method
+		 */
 		@Override
 		public void actionPerformed(ActionEvent event) {
 			
@@ -237,6 +333,12 @@ public class ClientChatUI extends JFrame implements Accessible {
 			}
 		}
 		
+		/**
+		 * The connect method that is used to connect to the server side 
+		 * @param host The host variable to be used 
+		 * @param port The port to connect through
+		 * @return Returns a Boolean
+		 */
 		private Boolean connect (String host, int port) {
 			
 			try {
@@ -260,16 +362,17 @@ public class ClientChatUI extends JFrame implements Accessible {
 				return true;
 				
 			} catch (UnknownHostException uhe) {
-				uhe.printStackTrace();
 				display.append("Error: Unknown Host" + ChatProtocolConstants.LINE_TERMINATOR);
 			} catch (IOException e) {
-				e.printStackTrace();
 				display.append("ERROR: Connection Refused" + ChatProtocolConstants.LINE_TERMINATOR);
 			}
 			
 			return false;
 		}
 		
+		/**
+		 * The send method used to send a message 
+		 */
 		private void send() {
 			
 			// gets text from message field and assigns it to sendMessage
